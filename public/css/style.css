@@ -974,6 +974,10 @@ body {
     
     .main-wrapper {
         margin-left: 0;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
     }
     
     .sidebar-toggle {
@@ -1055,6 +1059,16 @@ body {
         padding: 14px;
         flex-direction: column;
         align-items: stretch;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+    
+    .report-filter-bar > div:first-child {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
     }
     
     .period-tabs {
@@ -1110,11 +1124,19 @@ body {
     /* Content wrapper & card adjustments to prevent cutoffs */
     .content-body {
         padding: 12px 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
     }
     .glass-card {
         padding: 14px 12px !important;
         border-radius: var(--radius-md) !important;
         margin-bottom: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
     }
     
     /* 3 Items per row grid inside cashier catalog */
