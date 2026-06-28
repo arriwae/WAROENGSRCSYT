@@ -5,74 +5,44 @@
 
 @section('styles')
 <style>
-    /* Styling khusus print untuk mencetak daftar belanja saja */
+    /* Print container hidden by default on screen */
+    #print-restock-area {
+        display: none;
+    }
+
     @media print {
-        body * {
-            visibility: hidden;
-            background: transparent !important;
-            color: black !important;
-            box-shadow: none !important;
+        .app-container, .no-print, button, .btn, header, aside, .stats-grid, .glass-card, .table-container, .action-buttons-row, .mobile-view, .print-header {
+            display: none !important;
+            visibility: hidden !important;
         }
-        .main-wrapper, .main-wrapper * {
-            visibility: visible;
-        }
-        .main-wrapper {
+        #print-restock-area {
+            display: block !important;
+            visibility: visible !important;
+            width: 100% !important;
+            color: #000 !important;
+            background: #fff !important;
             position: absolute;
             left: 0;
             top: 0;
-            width: 100%;
-            padding: 0;
             margin: 0;
+            padding: 10mm;
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif;
         }
-        /* Sembunyikan sidebar, topbar, filter toolbar, tombol aksi, dan kolom aksi di tabel */
-        .sidebar, .topbar, .filter-toolbar, .action-buttons-row, .col-aksi, .btn-remove-item, .mobile-view {
-            display: none !important;
-        }
-        .desktop-view {
-            display: block !important;
-        }
-        .custom-table {
-            width: 100%;
-            border-collapse: collapse;
+        #print-restock-area table {
+            width: 100% !important;
+            border-collapse: collapse !important;
             margin-top: 20px;
         }
-        .custom-table th, .custom-table td {
+        #print-restock-area th, #print-restock-area td {
             border: 1px solid #000 !important;
-            padding: 8px !important;
-            color: black !important;
+            padding: 8px 10px !important;
+            font-size: 10pt !important;
+            color: #000 !important;
         }
-        .custom-table th {
+        #print-restock-area th {
             background-color: #f2f2f2 !important;
             font-weight: bold !important;
         }
-        .print-header {
-            display: block !important;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .print-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .print-header p {
-            margin: 4px 0 0 0;
-            font-size: 0.9rem;
-            color: #555;
-        }
-        /* Tampilkan input number sebagai teks biasa saat cetak */
-        .print-only-unit {
-            display: inline-block !important;
-            font-weight: bold;
-            color: black !important;
-        }
-        .qty-input-container {
-            display: none !important;
-        }
-    }
-
-    .print-only-unit {
-        display: none;
     }
 
     /* Tampilan dropdown autocomplete */
@@ -312,8 +282,11 @@
     function renderList() {
         const tbody = document.getElementById('restock-list-body');
         const mobileContainer = document.getElementById('restock-list-mobile');
+        const printTbody = document.getElementById('print-restock-tbody');
+        
         tbody.innerHTML = '';
         mobileContainer.innerHTML = '';
+        if (printTbody) printTbody.innerHTML = '';
 
         if (shoppingList.length === 0) {
             tbody.innerHTML = `
@@ -330,9 +303,19 @@
                     Belum ada barang di daftar kulakan. Silakan tambah barang di atas.
                 </div>
             `;
+            if (printTbody) {
+                printTbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px;">Belum ada barang di daftar belanja.</td>
+                    </tr>
+                `;
+            }
             document.getElementById('count-list-items').innerText = '0';
             document.getElementById('total-cost-display').innerText = formatRupiah(0);
             document.getElementById('print-total-modal').innerText = formatRupiah(0);
+            
+            const printTotalVal = document.getElementById('print-total-val');
+            if (printTotalVal) printTotalVal.innerText = formatRupiah(0);
             return;
         }
 
@@ -360,12 +343,6 @@
                     ${formatRupiah(item.purchase_price)}
                 </td>
                 <td style="text-align: center;">
-                    <!-- Show text only during printing -->
-                    <span class="print-only-unit">
-                        ${item.qty} ${item.unit === 'karton' ? 'Karton' : (item.unit === 'pak' ? 'Pak' : 'Pcs')}
-                    </span>
-                    
-                    <!-- Input controls for screen use -->
                     <div class="qty-input-container" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                         <input type="number" class="form-control" min="1" value="${item.qty}" 
                                style="width: 65px; text-align: center; background: rgba(0,0,0,0.2); border-color: var(--border-color); font-weight: bold; color: white; padding: 8px 4px;"
@@ -425,26 +402,57 @@
                             </div>
                         </div>
 
-                        <div class="mobile-card-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-color);">
+                        <div class="mobile-card-row" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-color);">
                             <span class="mobile-card-subtitle">Subtotal:</span>
-                            <strong style="color: #34d399; font-size: 0.9rem;">${formatRupiah(subtotal)}</strong>
-                        </div>
-                        
-                        <div class="mobile-card-actions" style="margin-top: 8px;">
-                            <button onclick="removeItem(${item.id})" class="btn btn-danger" style="width: 100%; color: #ef4444; border-color: rgba(239,68,68,0.2); background: transparent; padding: 6px !important;">
-                                <i class="fas fa-trash-alt"></i> Hapus
-                            </button>
+                            <strong style="color: #34d399; font-size: 0.95rem;">${formatRupiah(subtotal)}</strong>
                         </div>
                     </div>
                 </div>
+                <div class="mobile-card-actions">
+                    <button onclick="removeItem(${item.id})" class="btn btn-danger btn-remove-item" style="color: #ef4444; border-color: rgba(239,68,68,0.2);">
+                        <i class="fas fa-trash-alt"></i> Hapus
+                    </button>
+                </div>
             `;
             mobileContainer.appendChild(mobileCard);
+
+            // Add row to print table
+            if (printTbody) {
+                const printTr = document.createElement('tr');
+                printTr.innerHTML = `
+                    <td style="font-family: monospace; font-weight: bold;">${item.sku}</td>
+                    <td>${item.name}</td>
+                    <td style="text-align: center;">${item.stock} pcs</td>
+                    <td style="text-align: right;">${formatRupiah(item.purchase_price)}</td>
+                    <td style="text-align: center; font-weight: bold;">
+                        ${item.qty} ${item.unit === 'karton' ? 'Karton' : (item.unit === 'pak' ? 'Pak' : 'Pcs')}
+                    </td>
+                    <td style="text-align: right; font-weight: bold;">${formatRupiah(subtotal)}</td>
+                `;
+                printTbody.appendChild(printTr);
+            }
         });
 
-        // Update statistics
         document.getElementById('count-list-items').innerText = shoppingList.length;
         document.getElementById('total-cost-display').innerText = formatRupiah(totalCost);
         document.getElementById('print-total-modal').innerText = formatRupiah(totalCost);
+        
+        const printTotalVal = document.getElementById('print-total-val');
+        if (printTotalVal) printTotalVal.innerText = formatRupiah(totalCost);
+        
+        const printDateVal = document.getElementById('print-date-val');
+        if (printDateVal) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).replace(/\//g, '-') + ' ' + now.toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(/\./g, ':');
+            printDateVal.innerText = dateStr;
+        }
     }
 
     // Update qty for specific item
@@ -637,4 +645,33 @@
         }, 3000);
     }
 </script>
+@endsection
+
+@section('print-area')
+<div id="print-restock-area">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.6rem; font-weight: bold; margin: 0; text-transform: uppercase;">DAFTAR BELANJA KULAKAN</h2>
+        <h3 style="font-size: 1.25rem; font-weight: bold; margin: 5px 0 0 0; letter-spacing: 0.5px;">SRC SUYANTO</h3>
+        <p style="font-size: 0.9rem; margin: 6px 0 0 0; color: #333;">
+            Tanggal Cetak: <span id="print-date-val"></span> | 
+            Total Estimasi Modal: <span id="print-total-val" style="font-weight: bold;"></span>
+        </p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 150px;">Kode Barcode / SKU</th>
+                <th>Nama Barang</th>
+                <th style="text-align: center; width: 100px;">Stok Toko</th>
+                <th style="text-align: right; width: 120px;">Harga Beli</th>
+                <th style="text-align: center; width: 120px;">Jumlah Beli</th>
+                <th style="text-align: right; width: 150px;">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody id="print-restock-tbody">
+            <!-- Dynamic rows populated via JS -->
+        </tbody>
+    </table>
+</div>
 @endsection
