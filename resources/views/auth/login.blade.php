@@ -48,7 +48,12 @@
             
             <div class="form-group" style="margin-bottom: 28px;">
                 <label for="password"><i class="fas fa-lock" style="margin-right: 6px;"></i> Password</label>
-                <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                <div style="position: relative;">
+                    <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password" style="padding-right: 40px;">
+                    <button type="button" id="toggle-password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; padding: 4px;">
+                        <i class="fas fa-eye" id="eye-icon"></i>
+                    </button>
+                </div>
             </div>
             
             <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
@@ -83,6 +88,19 @@
                     } else {
                         localStorage.removeItem('remembered_username');
                     }
+                });
+            }
+
+            // 3. Handle password visibility toggle (Eye Icon)
+            const togglePasswordBtn = document.getElementById('toggle-password');
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eye-icon');
+            
+            if (togglePasswordBtn && passwordInput && eyeIcon) {
+                togglePasswordBtn.addEventListener('click', () => {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    eyeIcon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
                 });
             }
         });
