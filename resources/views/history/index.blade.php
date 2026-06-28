@@ -380,7 +380,9 @@
 
 <!-- Incorporate shared receipt layout -->
 @include('partials.receipt-modal')
+@endsection
 
+@section('print-area')
 <!-- Print area specifically populated for printing window.print() -->
 <div id="receipt-print-area"></div>
 @endsection

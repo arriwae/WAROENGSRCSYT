@@ -396,6 +396,15 @@ body {
     box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
+.toolbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -1174,9 +1183,11 @@ body {
     
     /* Toolbar & Search form responsive stacking */
     .toolbar-container {
+        display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 12px !important;
+        width: 100% !important;
     }
     .toolbar-form {
         display: flex !important;

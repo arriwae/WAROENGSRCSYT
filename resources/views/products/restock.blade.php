@@ -28,6 +28,9 @@
         .sidebar, .topbar, .filter-toolbar, .action-buttons-row, .col-aksi, .btn-remove-item, .mobile-view {
             display: none !important;
         }
+        .desktop-view {
+            display: block !important;
+        }
         .custom-table {
             width: 100%;
             border-collapse: collapse;
