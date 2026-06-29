@@ -288,8 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
         paymentAmountInput.addEventListener('input', calculateChange);
     }
 
-    // Search filter client-side (very fast for shop catalog)
+    // Search filter client-side (very fast for shop catalog) & Barcode scan handler
     if (productsSearch) {
+        // Auto-focus on load
+        productsSearch.focus();
+
         productsSearch.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             const productCards = document.querySelectorAll('.products-grid .product-card');
@@ -303,6 +306,93 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     card.style.display = 'none';
                 }
+            });
+        });
+
+        // Keydown listener for Barcode Scanner (types characters and finishes with 'Enter')
+        productsSearch.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = e.target.value.trim().toLowerCase();
+                if (!query) return;
+
+                let matchedCard = null;
+                const productCards = document.querySelectorAll('.products-grid .product-card');
+
+                // 1. Look for exact match by SKU/Barcode
+                for (const card of productCards) {
+                    const sku = card.getAttribute('data-sku') ? card.getAttribute('data-sku').trim().toLowerCase() : '';
+                    if (sku === query) {
+                        matchedCard = card;
+                        break;
+                    }
+                }
+
+                // 2. If not found, look for exact match by Product Name
+                if (!matchedCard) {
+                    for (const card of productCards) {
+                        const name = card.querySelector('.product-card-name').textContent.trim().toLowerCase();
+                        if (name === query) {
+                            matchedCard = card;
+                            break;
+                        }
+                    }
+                }
+
+                // 3. If still not found, check if there is only 1 visible card in the filtered grid
+                if (!matchedCard) {
+                    const visibleCards = Array.from(productCards).filter(card => card.style.display !== 'none');
+                    if (visibleCards.length === 1) {
+                        matchedCard = visibleCards[0];
+                    }
+                }
+
+                if (matchedCard) {
+                    // Check if disabled/out of stock
+                    const isOutOrExp = matchedCard.style.opacity === '0.5' || matchedCard.style.pointerEvents === 'none';
+                    if (isOutOrExp) {
+                        alert("Produk tidak bisa ditambahkan ke keranjang karena stok habis atau kedaluwarsa.");
+                    } else {
+                        // Programmatically click to add to cart
+                        matchedCard.click();
+                        // Clear search input and trigger input event to show all cards
+                        e.target.value = '';
+                        e.target.dispatchEvent(new Event('input'));
+                    }
+                } else {
+                    alert(`Barang dengan barcode/nama "${e.target.value}" tidak ditemukan.`);
+                }
+                
+                // Refocus search
+                e.target.focus();
+            }
+        });
+    }
+
+    // Global shortcut key: F2 to focus and select text in search bar
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') {
+            e.preventDefault();
+            if (productsSearch) {
+                productsSearch.focus();
+                productsSearch.select();
+            }
+        }
+    });
+
+    // Refocus search when receipt modal is closed
+    if (receiptModal) {
+        // Find all close elements in receipt modal (both the close x button and any footer/secondary action buttons)
+        const closeBtnElements = receiptModal.querySelectorAll('.modal-close, button');
+        closeBtnElements.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Wait slightly for modal animation to complete or class to be removed
+                setTimeout(() => {
+                    if (productsSearch && !receiptModal.classList.contains('active')) {
+                        productsSearch.focus();
+                        productsSearch.select();
+                    }
+                }, 150);
             });
         });
     }
@@ -866,6 +956,10 @@ document.addEventListener('DOMContentLoaded', () => {
             printBluetoothBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghubungkan...';
             
             try {
+                if (!navigator.bluetooth) {
+                    throw new Error("Web Bluetooth tidak didukung pada browser/koneksi ini. Web Bluetooth hanya aktif jika menggunakan localhost atau koneksi aman (HTTPS).");
+                }
+
                 if (!printerCharacteristic) {
                     alert("Silakan pilih printer Bluetooth thermal pada dialog sistem berikut.");
                     

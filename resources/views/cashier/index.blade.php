@@ -117,7 +117,7 @@
     <!-- Left Panel: Products List -->
     <div class="products-panel active-tab">
         <div class="search-bar-container" style="display: flex; gap: 12px; width: 100%;">
-            <input type="text" id="products-search" class="form-control" placeholder="Cari nama barang atau scan barcode..." style="border-radius: var(--radius-sm); font-size: 1rem; padding: 12px 16px; flex-grow: 1;">
+            <input type="text" id="products-search" class="form-control" placeholder="Cari nama barang atau scan barcode... (F2)" style="border-radius: var(--radius-sm); font-size: 1rem; padding: 12px 16px; flex-grow: 1;">
             <button type="button" onclick="openDigitalModal()" class="btn btn-primary" style="border-radius: var(--radius-sm); white-space: nowrap; background: var(--grad-purple); box-shadow: 0 4px 10px rgba(168,85,247,0.3); font-weight: bold; gap: 6px;">
                 <i class="fas fa-mobile-alt"></i> Top Up / Transfer
             </button>

@@ -512,6 +512,20 @@
         }
     }
     
+    // Barcode scanner helper for SKU field in Add/Edit Product Modal
+    const prodSkuInput = document.getElementById('prod-sku');
+    if (prodSkuInput) {
+        prodSkuInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Stop premature form submission
+                const nextInput = document.getElementById('prod-name');
+                if (nextInput) {
+                    nextInput.focus(); // Move focus to Product Name
+                }
+            }
+        });
+    }
+
     // Close modal when clicking outside content area
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
