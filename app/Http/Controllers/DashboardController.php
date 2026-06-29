@@ -47,17 +47,31 @@ class DashboardController extends Controller
 
         // 3. Sales Analytics (Most Popular and Least Popular)
         // Most Popular (Paling Laris)
-        $popularProducts = Product::select('products.*', DB::raw('SUM(sale_details.quantity) as total_sold'))
-            ->join('sale_details', 'products.id', '=', 'sale_details.product_id')
-            ->groupBy('products.id')
+        $popularProducts = Product::select('products.*', 'sales_summary.total_sold')
+            ->joinSub(
+                DB::table('sale_details')
+                    ->select('product_id', DB::raw('SUM(quantity) as total_sold'))
+                    ->groupBy('product_id'),
+                'sales_summary',
+                'products.id',
+                '=',
+                'sales_summary.product_id'
+            )
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
 
         // Least Popular (Tidak Laris)
-        $unpopularProducts = Product::select('products.*', DB::raw('COALESCE(SUM(sale_details.quantity), 0) as total_sold'))
-            ->leftJoin('sale_details', 'products.id', '=', 'sale_details.product_id')
-            ->groupBy('products.id')
+        $unpopularProducts = Product::select('products.*', DB::raw('COALESCE(sales_summary.total_sold, 0) as total_sold'))
+            ->leftJoinSub(
+                DB::table('sale_details')
+                    ->select('product_id', DB::raw('SUM(quantity) as total_sold'))
+                    ->groupBy('product_id'),
+                'sales_summary',
+                'products.id',
+                '=',
+                'sales_summary.product_id'
+            )
             ->orderBy('total_sold', 'asc')
             ->limit(5)
             ->get();
